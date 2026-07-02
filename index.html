@@ -985,7 +985,9 @@
   });
 
   function hideLoading() {
-    document.getElementById('loading-screen').classList.add('hidden');
+    const el = document.getElementById('loading-screen');
+    el.style.opacity = '0';
+    setTimeout(() => { el.style.display = 'none'; }, 350);
   }
 
   // ─── NAVIGATION ───────────────────────────────────────────────────
