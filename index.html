@@ -592,6 +592,49 @@
     .text-yellow { color: var(--yellow); }
     .text-danger { color: var(--danger); }
 
+
+    /* Scored pick cards */
+    .game-card.correct { border-color: var(--green); background: rgba(0,200,83,0.06); }
+    .game-card.wrong   { border-color: var(--danger); background: rgba(248,81,73,0.06); }
+    .points-earned {
+      font-family: var(--font-display);
+      font-size: 13px;
+      text-align: center;
+      margin-top: 4px;
+    }
+    .points-earned.correct { color: var(--green); }
+    .points-earned.wrong   { color: var(--danger); }
+    .score-display {
+      font-size: 12px;
+      color: var(--muted);
+      text-align: center;
+      margin-top: 2px;
+    }
+    .week-summary {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin-bottom: 20px;
+      display: flex;
+      gap: 32px;
+      align-items: center;
+    }
+    .week-summary-stat { text-align: center; }
+    .week-summary-val {
+      font-family: var(--font-display);
+      font-size: 36px;
+      color: var(--green);
+      line-height: 1;
+    }
+    .week-summary-label {
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+
     @media (max-width: 480px) {
       .lobby-options { grid-template-columns: 1fr; }
       .game-card { grid-template-columns: 1fr auto 1fr auto; gap: 8px; }
@@ -857,6 +900,7 @@
           <input type="number" id="admin-week-num" min="1" max="18" value="1" style="width:80px;" />
         </div>
         <button class="btn btn-primary" onclick="adminFetchGames()">Fetch Games from ESPN</button>
+        <button class="btn btn-secondary" onclick="adminScoreWeek()" style="margin-top:10px;">Score Week</button>
         <div class="error-msg" id="admin-fetch-error" style="margin-top:8px;"></div>
         <div id="admin-fetch-result" class="mt-16" style="font-size:13px;color:var(--muted);"></div>
       </div>
@@ -923,8 +967,14 @@
     if (user) {
       currentUser = user;
       document.getElementById('nav-user').textContent = user.displayName || user.email;
-      await loadUserLeague();
-      hideLoading();
+      try {
+        await loadUserLeague();
+      } catch(e) {
+        console.error('loadUserLeague error:', e);
+        showView('lobby');
+      } finally {
+        hideLoading();
+      }
     } else {
       currentUser   = null;
       currentLeague = null;
@@ -1117,6 +1167,35 @@
     const totalGames = games.length;
     document.getElementById('picks-total-count').textContent = totalGames;
 
+    // If week is scored, show results view
+    const isScored = pickSnap.exists() && pickSnap.data().scored;
+    if (isScored) {
+      const scoredData = pickSnap.data();
+      const scoredMap  = {};
+      (scoredData.scoredPicks || []).forEach(p => { scoredMap[p.gameId] = p; });
+
+      // Summary banner
+      const summary = document.createElement('div');
+      summary.className = 'week-summary';
+      summary.innerHTML = `
+        <div class="week-summary-stat">
+          <div class="week-summary-val">${scoredData.weekPoints || 0}</div>
+          <div class="week-summary-label">Points</div>
+        </div>
+        <div class="week-summary-stat">
+          <div class="week-summary-val">${scoredData.weekCorrect || 0}/${games.length}</div>
+          <div class="week-summary-label">Correct</div>
+        </div>
+      `;
+      list.innerHTML = '';
+      list.appendChild(summary);
+      const gamesDiv = document.createElement('div');
+      gamesDiv.innerHTML = games.map(game => buildGameCard(game, true, scoredMap[game.gameId])).join('');
+      list.appendChild(gamesDiv);
+      document.getElementById('picks-footer').style.display = 'none';
+      return;
+    }
+
     list.innerHTML = games.map(game => buildGameCard(game, isLocked)).join('');
     updatePicksProgress();
     updateSubmitBtn();
@@ -1130,21 +1209,25 @@
     }
   }
 
-  function buildGameCard(game, locked) {
-    const pick = userPicks[game.gameId] || {};
+  function buildGameCard(game, locked, scoredPick) {
+    // scoredPick: { correct, pointsEarned, pickedTeam, confidencePoints } or undefined
+    const isScored = scoredPick && scoredPick.correct !== null && scoredPick.correct !== undefined;
+
+    const pick = scoredPick || userPicks[game.gameId] || {};
     const awaySelected = pick.pickedTeam === game.awayTeam ? 'selected' : '';
     const homeSelected = pick.pickedTeam === game.homeTeam ? 'selected' : '';
     const confVal      = pick.confidencePoints || '';
     const confClass    = confVal ? 'assigned' : '';
-    const lockedClass  = locked ? 'locked' : '';
+    const lockedClass  = (locked || isScored) ? 'locked' : '';
     const pickedClass  = pick.pickedTeam ? 'picked' : '';
+    const scoredClass  = isScored ? (scoredPick.correct ? 'correct' : 'wrong') : '';
 
     const opts = Array.from({length: currentWeekDoc.games.length}, (_, i) => i + 1)
       .map(n => `<option value="${n}" ${confVal == n ? 'selected' : ''}>${n}</option>`)
       .join('');
 
     return `
-      <div class="game-card ${pickedClass} ${lockedClass}" id="card-${game.gameId}">
+      <div class="game-card ${pickedClass} ${lockedClass} ${scoredClass}" id="card-${game.gameId}">
         <div class="team-block away">
           <div class="team-abbr">${game.awayTeam}</div>
           <div class="team-full">${game.awayFull || 'Away'}</div>
@@ -1161,11 +1244,16 @@
             onclick="pickTeam('${game.gameId}','${game.homeTeam}')">Pick</button>
         </div>
 
-        <select class="conf-select ${confClass}" id="conf-${game.gameId}"
-          onchange="setConfidence('${game.gameId}', this.value)">
-          <option value="">—</option>
-          ${opts}
-        </select>
+        <div style="display:flex;flex-direction:column;align-items:center;">
+          <select class="conf-select ${confClass}" id="conf-${game.gameId}"
+            onchange="setConfidence('${game.gameId}', this.value)"
+            ${isScored ? 'disabled' : ''}>
+            <option value="">—</option>
+            ${opts}
+          </select>
+          ${isScored ? `<div class="points-earned ${scoredPick.correct ? 'correct' : 'wrong'}">${scoredPick.correct ? '+' + scoredPick.pointsEarned : '0'} pts</div>` : ''}
+          ${game.completed && game.awayScore !== null ? `<div class="score-display">${game.awayScore}-${game.homeScore}</div>` : ''}
+        </div>
       </div>
     `;
   }
@@ -1477,6 +1565,126 @@
     btn.disabled     = loading;
     btn.textContent  = loading ? 'Loading…' : btn.dataset.label || btn.textContent;
   }
+
+  // SCORING ENGINE
+  async function adminScoreWeek() {
+    const weekNum = parseInt(document.getElementById('admin-week-num').value);
+    const errEl   = document.getElementById('admin-fetch-error');
+    const resEl   = document.getElementById('admin-fetch-result');
+    errEl.textContent = '';
+    resEl.textContent = 'Scoring week...';
+
+    try {
+      // 1. Re-fetch latest results from ESPN
+      const url    = `https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard?seasontype=2&week=${weekNum}&season=2026`;
+      const res    = await fetch(url);
+      const data   = await res.json();
+      const events = data.events || [];
+      if (!events.length) { errEl.textContent = 'No games found.'; resEl.textContent = ''; return; }
+
+      // 2. Build result map
+      const resultMap = {};
+      const updatedGames = events.map(ev => {
+        const comps  = ev.competitions[0];
+        const away   = comps.competitors.find(c => c.homeAway === 'away');
+        const home   = comps.competitors.find(c => c.homeAway === 'home');
+        const result = comps.status.type.completed
+          ? (parseInt(away.score) > parseInt(home.score) ? 'away' : 'home')
+          : null;
+        resultMap[ev.id] = { result, awayTeam: away.team.abbreviation, homeTeam: home.team.abbreviation };
+        return {
+          gameId: ev.id,
+          awayTeam: away.team.abbreviation, awayFull: away.team.displayName,
+          awayScore: away.score || null,
+          homeTeam: home.team.abbreviation, homeFull: home.team.displayName,
+          homeScore: home.score || null,
+          kickoff: ev.date,
+          result,
+          completed: comps.status.type.completed
+        };
+      });
+
+      const allFinal   = updatedGames.every(g => g.completed);
+      const anyStarted = updatedGames.some(g => new Date(g.kickoff) <= new Date());
+
+      // 3. Update week doc
+      await setDoc(doc(db, 'leagues', currentLeague.id, 'weeks', String(weekNum)), {
+        weekNumber: weekNum, games: updatedGames,
+        lockTime: updatedGames[0].kickoff,
+        isLocked: anyStarted, allFinal, fetchedAt: serverTimestamp()
+      });
+
+      // 4. Load all picks for this week
+      const picksSnap = await getDocs(collection(db, 'leagues', currentLeague.id, 'picks'));
+      const weekPicks = [];
+      picksSnap.forEach(d => { const pd = d.data(); if (pd.weekNumber === weekNum) weekPicks.push({ id: d.id, ...pd }); });
+
+      if (!weekPicks.length) {
+        resEl.textContent = `Results updated. No picks submitted yet for Week ${weekNum}.`;
+        return;
+      }
+
+      // 5. Score each user
+      let scored = 0;
+      for (const pickDoc of weekPicks) {
+        let weekPoints = 0, weekCorrect = 0;
+        const scoredPicks = pickDoc.picks.map(p => {
+          const game = resultMap[p.gameId];
+          if (!game || !game.result) return { ...p, correct: null, pointsEarned: 0 };
+          const pickedSide = p.pickedTeam === game.awayTeam ? 'away'
+                           : p.pickedTeam === game.homeTeam ? 'home' : null;
+          const correct      = pickedSide === game.result;
+          const pointsEarned = correct ? p.confidencePoints : 0;
+          weekPoints  += pointsEarned;
+          if (correct) weekCorrect++;
+          return { ...p, correct, pointsEarned };
+        });
+
+        await updateDoc(doc(db, 'leagues', currentLeague.id, 'picks', pickDoc.id), {
+          scoredPicks, weekPoints, weekCorrect, scored: true
+        });
+
+        const standingsRef  = doc(db, 'leagues', currentLeague.id, 'standings', pickDoc.userId);
+        const standingsSnap = await getDoc(standingsRef);
+        if (standingsSnap.exists()) {
+          const ex = standingsSnap.data();
+          const bd = ex.weeklyBreakdown || {};
+          bd[weekNum] = { points: weekPoints, correct: weekCorrect };
+          const totalPoints  = Object.values(bd).reduce((s, w) => s + (w.points  || 0), 0);
+          const totalCorrect = Object.values(bd).reduce((s, w) => s + (w.correct || 0), 0);
+          await updateDoc(standingsRef, { totalPoints, totalCorrect, weeklyBreakdown: bd, displayName: pickDoc.displayName, userId: pickDoc.userId });
+        } else {
+          await setDoc(standingsRef, {
+            userId: pickDoc.userId, displayName: pickDoc.displayName,
+            totalPoints: weekPoints, totalCorrect: weekCorrect,
+            weeklyBreakdown: { [weekNum]: { points: weekPoints, correct: weekCorrect } }
+          });
+        }
+        scored++;
+      }
+
+      resEl.textContent = `Week ${weekNum} scored -- ${scored} entries updated.`;
+      toast(`Week ${weekNum} scored!`, 'success');
+    } catch(e) {
+      errEl.textContent = 'Scoring error. Check console.';
+      resEl.textContent = '';
+      console.error(e);
+    }
+  }
+  window.adminScoreWeek = adminScoreWeek;
+
+  // AUTO-LOCK
+  async function checkAndLock() {
+    if (!currentWeekDoc || currentWeekDoc.isLocked) return;
+    const firstKickoff = new Date(currentWeekDoc.games?.[0]?.kickoff);
+    if (firstKickoff && firstKickoff <= new Date()) {
+      await updateDoc(doc(db, 'leagues', currentLeague.id, 'weeks', String(currentLeague.currentWeek)), { isLocked: true });
+      currentWeekDoc.isLocked = true;
+    }
+  }
+  window.checkAndLock = checkAndLock;
+
+
 </script>
 </body>
 </html>
