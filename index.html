@@ -646,11 +646,6 @@
 </head>
 <body>
 
-<!-- Loading screen -->
-<div id="loading-screen">
-  <div class="loading-logo">GRIDIRON</div>
-</div>
-
 <!-- Toast -->
 <div id="toast"></div>
 
@@ -984,11 +979,7 @@
     }
   });
 
-  function hideLoading() {
-    const el = document.getElementById('loading-screen');
-    el.style.opacity = '0';
-    setTimeout(() => { el.style.display = 'none'; }, 350);
-  }
+  function hideLoading() { /* loading screen removed */ }
 
   // ─── NAVIGATION ───────────────────────────────────────────────────
   function showView(name) {
