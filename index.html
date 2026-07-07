@@ -386,7 +386,12 @@ function gameCard(g, locked, sp) {
   const hsel = pick.pickedTeam === g.homeTeam ? 'on' : '';
   const cv   = pick.confidencePoints || '';
   const total = weekDoc?.games?.length || 16;
-  const opts  = Array.from({length:total},(_,i)=>i+1).map(n=>`<option value="${n}" ${cv==n?'selected':''}>${n}</option>`).join('');
+  // Build opts — exclude numbers taken by other games, but include this game's current value
+  const takenNums = new Set(Object.entries(userPicks).filter(([id,p])=>id!==g.gameId&&p.confidencePoints).map(([,p])=>p.confidencePoints));
+  const opts  = Array.from({length:total},(_,i)=>i+1).map(n=>{
+    if (takenNums.has(n) && n!=cv) return `<option value="${n}" disabled style="color:#444">${n}</option>`;
+    return `<option value="${n}" ${cv==n?'selected':''}>${n}</option>`;
+  }).join('');
   const sc    = isScored ? (sp.correct ? 'correct' : 'wrong') : '';
   const lk    = (locked||isScored) ? 'locked' : '';
   const pk    = pick.pickedTeam ? 'picked' : '';
@@ -435,22 +440,11 @@ window.pickTeam = function(gid, team) {
 window.setConf = function(gid, val) {
   if (!userPicks[gid]) userPicks[gid] = {};
   const num = parseInt(val);
-  if (num) {
-    Object.keys(userPicks).forEach(id => {
-      if (id !== gid && userPicks[id].confidencePoints === num) {
-        userPicks[id].confidencePoints = null;
-        const s = document.getElementById('cs-'+id);
-        if (s) { s.value=''; s.className='conf-sel'; }
-      }
-    });
-    userPicks[gid].confidencePoints = num;
-    const s = document.getElementById('cs-'+gid);
-    if (s) s.className = 'conf-sel set';
-  } else {
-    userPicks[gid].confidencePoints = null;
-    const s = document.getElementById('cs-'+gid);
-    if (s) s.className = 'conf-sel';
-  }
+  userPicks[gid].confidencePoints = num || null;
+  // Re-render all cards so disabled options update across the board
+  const games = weekDoc?.games || [];
+  const isLocked = weekDoc?.isLocked || false;
+  document.getElementById('games-list').innerHTML = games.map(g => gameCard(g, isLocked)).join('');
   updateProgress(); updateSubmit();
 };
 
