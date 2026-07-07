@@ -4,580 +4,609 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Gridiron Confidence</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
       --bg: #0D1117; --surface: #161B22; --border: #2A2D35;
-      --green: #00C853; --green-dim: #008f3a; --yellow: #FFD600;
-      --white: #F0F0F0; --muted: #6E7681; --danger: #F85149;
-      --font-display: 'Bebas Neue', sans-serif;
-      --font-body: 'Inter', sans-serif;
-      --max-w: 720px;
+      --green: #00C853; --yellow: #FFD600; --white: #F0F0F0;
+      --muted: #6E7681; --danger: #F85149;
+      --display: 'Bebas Neue', sans-serif;
+      --body: 'Inter', sans-serif;
     }
-    html, body { background: var(--bg); color: var(--white); font-family: var(--font-body); font-size: 15px; min-height: 100vh; }
+    html, body { background: var(--bg); color: var(--white); font-family: var(--body); min-height: 100vh; }
 
-    /* NAV */
-    #nav { display: flex; align-items: center; justify-content: space-between; padding: 0 20px; height: 52px; background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
-    .nav-logo { font-family: var(--font-display); font-size: 22px; letter-spacing: 1px; color: var(--green); cursor: pointer; }
+    nav { display: flex; align-items: center; justify-content: space-between; padding: 0 24px; height: 52px; background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
+    .logo { font-family: var(--display); font-size: 22px; color: var(--green); cursor: pointer; letter-spacing: 1px; }
     .nav-links { display: flex; gap: 4px; }
-    .nav-link { background: none; border: none; color: var(--muted); font-family: var(--font-body); font-size: 13px; font-weight: 500; padding: 6px 12px; border-radius: 6px; cursor: pointer; transition: color 0.15s, background 0.15s; }
-    .nav-link:hover, .nav-link.active { color: var(--white); background: var(--border); }
+    .nav-btn { background: none; border: none; color: var(--muted); font-family: var(--body); font-size: 13px; font-weight: 500; padding: 6px 12px; border-radius: 6px; cursor: pointer; }
+    .nav-btn:hover, .nav-btn.active { color: var(--white); background: var(--border); }
 
-    /* VIEWS */
-    .view { display: none; }
-    .view.active { display: block; }
-    .view-inner { max-width: var(--max-w); margin: 0 auto; padding: 40px 20px 80px; }
+    .page { display: none; max-width: 720px; margin: 0 auto; padding: 36px 20px 80px; }
+    .page.active { display: block; }
 
-    /* TYPE */
-    .display { font-family: var(--font-display); font-size: 48px; letter-spacing: 1px; line-height: 1; }
-    .display span { color: var(--green); }
-    .section-label { font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 16px; }
-    h2 { font-family: var(--font-display); font-size: 28px; color: var(--white); margin-bottom: 20px; }
+    .label { font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+    .display { font-family: var(--display); font-size: 44px; line-height: 1; }
+    .display em { color: var(--green); font-style: normal; }
+    h2 { font-family: var(--display); font-size: 26px; margin-bottom: 16px; }
+    .divider { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
 
-    /* BUTTONS */
-    .btn { display: inline-flex; align-items: center; justify-content: center; padding: 10px 20px; border-radius: 8px; font-family: var(--font-body); font-size: 14px; font-weight: 600; cursor: pointer; border: none; transition: opacity 0.15s, background 0.15s; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 12px; }
+
+    .btn { display: inline-flex; align-items: center; justify-content: center; padding: 10px 20px; border-radius: 8px; font-family: var(--body); font-size: 14px; font-weight: 600; cursor: pointer; border: none; }
+    .btn-green { background: var(--green); color: #000; }
+    .btn-green:hover { background: #00e060; }
+    .btn-gray { background: var(--border); color: var(--white); }
+    .btn-gray:hover { background: #3a3f4a; }
     .btn:disabled { opacity: 0.4; cursor: not-allowed; }
-    .btn-primary { background: var(--green); color: #000; }
-    .btn-primary:hover:not(:disabled) { background: #00e060; }
-    .btn-secondary { background: var(--border); color: var(--white); }
-    .btn-secondary:hover:not(:disabled) { background: #3a3f4a; }
     .btn-full { width: 100%; }
 
-    /* CARD */
-    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 12px; }
-    .divider { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
+    .field { margin-bottom: 14px; }
+    .field label { display: block; font-size: 11px; font-weight: 600; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
+    .field input, .field select { width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; color: var(--white); font-family: var(--body); font-size: 14px; outline: none; }
+    .field input:focus, .field select:focus { border-color: var(--green); }
 
-    /* TOAST */
-    #toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--surface); border: 1px solid var(--border); color: var(--white); padding: 10px 20px; border-radius: 99px; font-size: 13px; font-weight: 500; opacity: 0; transition: opacity 0.2s, transform 0.2s; pointer-events: none; white-space: nowrap; z-index: 999; }
-    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-    #toast.success { border-color: var(--green); color: var(--green); }
-    #toast.error { border-color: var(--danger); color: var(--danger); }
+    /* STATUS */
+    .status-row { display: flex; align-items: center; gap: 10px; margin-top: 14px; font-size: 13px; color: var(--muted); }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+    .dot.green { background: var(--green); }
+    .dot.yellow { background: var(--yellow); }
 
-    /* HOME */
-    .week-badge { display: inline-block; background: var(--green); color: #000; font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; padding: 4px 10px; border-radius: 4px; margin-bottom: 12px; }
-    .picks-status { display: flex; align-items: center; gap: 10px; margin-top: 16px; font-size: 13px; color: var(--muted); }
-    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); flex-shrink: 0; }
-    .status-dot.submitted { background: var(--green); }
-    .status-dot.locked { background: var(--yellow); }
+    /* STANDINGS */
+    table { width: 100%; border-collapse: collapse; }
+    th { font-size: 11px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--border); }
+    th.r, td.r { text-align: right; }
+    td { padding: 12px; border-bottom: 1px solid var(--border); font-size: 14px; }
+    tr:last-child td { border-bottom: none; }
+    .rank { font-family: var(--display); font-size: 20px; color: var(--border); }
+    .rank.hi { color: var(--green); }
+    .pts { font-family: var(--display); font-size: 20px; }
 
-    /* STANDINGS TABLE */
-    .standings-table { width: 100%; border-collapse: collapse; }
-    .standings-table th { font-size: 11px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--border); }
-    .standings-table th.right, .standings-table td.right { text-align: right; }
-    .standings-table td { padding: 12px; border-bottom: 1px solid var(--border); font-size: 14px; color: var(--white); }
-    .standings-table tr:last-child td { border-bottom: none; }
-    .rank-num { font-family: var(--font-display); font-size: 22px; color: var(--border); line-height: 1; min-width: 28px; }
-    .rank-num.top { color: var(--green); }
-    .pts-val { font-family: var(--font-display); font-size: 22px; color: var(--white); line-height: 1; }
-
-    /* PICK SHEET */
-    .pick-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
-    .lock-info { font-size: 12px; color: var(--muted); }
-    .lock-info span { color: var(--yellow); font-weight: 600; }
-    .game-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin-bottom: 10px; display: grid; grid-template-columns: 1fr auto 1fr auto; align-items: center; gap: 12px; transition: border-color 0.15s; }
-    .game-card.picked { border-color: var(--green-dim); }
+    /* GAME CARDS */
+    .game-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin-bottom: 8px; display: grid; grid-template-columns: 1fr auto 1fr auto; align-items: center; gap: 10px; }
+    .game-card.picked { border-color: #008f3a; }
     .game-card.locked { opacity: 0.6; pointer-events: none; }
-    .game-card.correct { border-color: var(--green); background: rgba(0,200,83,0.06); }
-    .game-card.wrong { border-color: var(--danger); background: rgba(248,81,73,0.06); }
-    .team-block { display: flex; flex-direction: column; gap: 2px; }
-    .team-block.away { text-align: left; }
-    .team-block.home { text-align: right; }
-    .team-abbr { font-family: var(--font-display); font-size: 26px; line-height: 1; color: var(--white); }
-    .team-full { font-size: 11px; color: var(--muted); }
-    .at-sign { font-family: var(--font-display); font-size: 18px; color: var(--border); }
-    .conf-select { appearance: none; background: var(--bg); border: 2px solid var(--border); border-radius: 8px; color: var(--white); font-family: var(--font-display); font-size: 24px; width: 56px; height: 56px; text-align: center; cursor: pointer; outline: none; transition: border-color 0.15s; }
-    .conf-select:focus { border-color: var(--green); }
-    .conf-select.assigned { border-color: var(--green); color: var(--green); }
-    .team-pick-btn { flex: 1; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; color: var(--muted); font-family: var(--font-body); font-size: 12px; font-weight: 600; padding: 6px 10px; cursor: pointer; transition: all 0.15s; text-align: center; }
-    .team-pick-btn.selected { background: var(--green); border-color: var(--green); color: #000; }
-    .picks-footer { margin-top: 24px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-    .picks-progress { font-size: 13px; color: var(--muted); }
-    .picks-progress strong { color: var(--white); }
-    .points-earned { font-family: var(--font-display); font-size: 13px; text-align: center; margin-top: 4px; }
-    .points-earned.correct { color: var(--green); }
-    .points-earned.wrong { color: var(--danger); }
-    .score-display { font-size: 12px; color: var(--muted); text-align: center; margin-top: 2px; }
-    .week-summary { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 20px; margin-bottom: 20px; display: flex; gap: 32px; align-items: center; }
-    .week-summary-val { font-family: var(--font-display); font-size: 36px; color: var(--green); line-height: 1; }
-    .week-summary-label { font-size: 11px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-top: 4px; }
+    .game-card.correct { border-color: var(--green); background: rgba(0,200,83,0.05); }
+    .game-card.wrong { border-color: var(--danger); background: rgba(248,81,73,0.05); }
+    .team { display: flex; flex-direction: column; gap: 3px; }
+    .team.away { text-align: left; }
+    .team.home { text-align: right; }
+    .abbr { font-family: var(--display); font-size: 26px; line-height: 1; }
+    .full-name { font-size: 11px; color: var(--muted); }
+    .at { font-family: var(--display); font-size: 16px; color: var(--border); }
+    .pick-btn { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; color: var(--muted); font-size: 11px; font-weight: 600; padding: 5px 8px; cursor: pointer; margin-top: 6px; width: 100%; }
+    .pick-btn.on { background: var(--green); border-color: var(--green); color: #000; }
+    .conf-wrap { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .conf-sel { appearance: none; background: var(--bg); border: 2px solid var(--border); border-radius: 8px; color: var(--white); font-family: var(--display); font-size: 22px; width: 52px; height: 52px; text-align: center; cursor: pointer; outline: none; }
+    .conf-sel:focus { border-color: var(--green); }
+    .conf-sel.set { border-color: var(--green); color: var(--green); }
+    .pts-earned { font-family: var(--display); font-size: 13px; }
+    .pts-earned.correct { color: var(--green); }
+    .pts-earned.wrong { color: var(--danger); }
+    .score { font-size: 11px; color: var(--muted); }
 
-    /* STANDINGS NAV */
-    .week-nav { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
-    .week-nav-label { font-family: var(--font-display); font-size: 20px; flex: 1; text-align: center; }
+    .picks-footer { margin-top: 20px; display: flex; align-items: center; justify-content: space-between; }
+    .progress { font-size: 13px; color: var(--muted); }
+    .progress strong { color: var(--white); }
 
-    /* LEAGUE */
-    .passcode-display { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 16px 20px; font-family: var(--font-display); font-size: 32px; letter-spacing: 6px; color: var(--green); text-align: center; margin-bottom: 8px; }
-    .member-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
-    .member-row:last-child { border-bottom: none; }
-    .member-you { font-size: 11px; color: var(--green); font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
+    .week-summary { display: flex; gap: 32px; margin-bottom: 20px; }
+    .sum-stat { text-align: center; }
+    .sum-val { font-family: var(--display); font-size: 40px; color: var(--green); line-height: 1; }
+    .sum-lbl { font-size: 11px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-top: 4px; }
 
-    /* FIELD */
-    .field { margin-bottom: 16px; }
-    .field label { display: block; font-size: 12px; font-weight: 600; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
-    .field input { width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; color: var(--white); font-family: var(--font-body); font-size: 14px; outline: none; transition: border-color 0.15s; }
-    .field input:focus { border-color: var(--green); }
-    .field input::placeholder { color: var(--muted); }
-    .error-msg { font-size: 13px; color: var(--danger); margin-top: 8px; min-height: 18px; }
+    .week-nav { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+    .week-nav-label { font-family: var(--display); font-size: 20px; flex: 1; text-align: center; }
 
-    .mt-8 { margin-top: 8px; }
-    .mt-16 { margin-top: 16px; }
-    .mt-24 { margin-top: 24px; }
-    .text-muted { color: var(--muted); font-size: 13px; }
+    .week-badge { display: inline-block; background: var(--green); color: #000; font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; padding: 3px 10px; border-radius: 4px; margin-bottom: 10px; }
 
-    @media (max-width: 480px) {
-      .game-card { gap: 8px; }
-      .team-abbr { font-size: 22px; }
-      .conf-select { width: 48px; height: 48px; font-size: 20px; }
-    }
+    #toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(16px); background: var(--surface); border: 1px solid var(--border); color: var(--white); padding: 10px 20px; border-radius: 99px; font-size: 13px; font-weight: 500; opacity: 0; transition: all 0.2s; pointer-events: none; z-index: 999; white-space: nowrap; }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    #toast.ok { border-color: var(--green); color: var(--green); }
+    #toast.err { border-color: var(--danger); color: var(--danger); }
+
+    .err-msg { font-size: 13px; color: var(--danger); margin-top: 8px; }
+    .info-msg { font-size: 13px; color: var(--muted); margin-top: 8px; }
+    .mt16 { margin-top: 16px; }
+    .mt24 { margin-top: 24px; }
   </style>
 </head>
 <body>
-
 <div id="toast"></div>
 
-<nav id="nav">
-  <div class="nav-logo" onclick="navigate('home')">GRIDIRON</div>
+<nav>
+  <div class="logo" onclick="go('home')">GRIDIRON</div>
   <div class="nav-links">
-    <button class="nav-link" data-view="home" onclick="navigate('home')">Home</button>
-    <button class="nav-link" data-view="picks" onclick="navigate('picks')">Picks</button>
-    <button class="nav-link" data-view="standings" onclick="navigate('standings')">Standings</button>
-    <button class="nav-link" data-view="league" onclick="navigate('league')">League</button>
+    <button class="nav-btn" data-p="home"      onclick="go('home')">Home</button>
+    <button class="nav-btn" data-p="picks"     onclick="go('picks')">Picks</button>
+    <button class="nav-btn" data-p="standings" onclick="go('standings')">Standings</button>
+    <button class="nav-btn" data-p="league"    onclick="go('league')">League</button>
   </div>
 </nav>
 
 <!-- HOME -->
-<div id="view-home" class="view active">
-  <div class="view-inner">
-    <div class="week-badge" id="home-week-badge">Week —</div>
-    <div class="display">Make your <span>picks.</span></div>
-    <div class="picks-status mt-16">
-      <div class="status-dot" id="home-status-dot"></div>
-      <span id="home-status-text">No picks submitted yet.</span>
-    </div>
-    <hr class="divider" />
-    <div class="section-label">Standings</div>
-    <div class="card" style="padding:0;overflow:hidden;">
-      <table class="standings-table">
-        <thead><tr><th style="width:36px;">#</th><th>Player</th><th class="right">Correct</th><th class="right">PTS</th></tr></thead>
-        <tbody id="home-standings-body"><tr><td colspan="4" style="text-align:center;color:var(--muted);padding:24px;">No scores yet.</td></tr></tbody>
-      </table>
-    </div>
-    <button class="btn btn-primary mt-24" onclick="navigate('picks')">Go to Pick Sheet →</button>
+<div id="page-home" class="page active">
+  <div class="week-badge" id="home-badge">Week —</div>
+  <div class="display">Make your <em>picks.</em></div>
+  <div class="status-row">
+    <div class="dot" id="home-dot"></div>
+    <span id="home-status">Loading...</span>
   </div>
+  <div class="divider"></div>
+  <div class="label">Standings</div>
+  <div class="card" style="padding:0;overflow:hidden;">
+    <table>
+      <thead><tr><th style="width:32px">#</th><th>Player</th><th class="r">Correct</th><th class="r">Pts</th></tr></thead>
+      <tbody id="home-standings"><tr><td colspan="4" style="text-align:center;color:var(--muted);padding:20px">No scores yet.</td></tr></tbody>
+    </table>
+  </div>
+  <button class="btn btn-green mt24" onclick="go('picks')">Go to Pick Sheet →</button>
 </div>
 
 <!-- PICKS -->
-<div id="view-picks" class="view">
-  <div class="view-inner">
-    <div class="pick-header">
-      <div>
-        <div class="section-label">Week <span id="picks-week-num">—</span></div>
-        <h2 style="margin-bottom:0;">Pick Sheet</h2>
-      </div>
-      <div class="lock-info">Locks <span id="picks-lock-time">—</span></div>
+<div id="page-picks" class="page">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+    <div>
+      <div class="label">Week <span id="picks-week">—</span></div>
+      <h2 style="margin:0">Pick Sheet</h2>
     </div>
-    <div id="picks-locked-banner" style="display:none;" class="card">
-      <span style="color:var(--yellow);">⚠ Picks are locked for this week.</span>
-    </div>
-    <div id="games-list">
-      <div style="text-align:center;padding:40px;color:var(--muted);">No games loaded yet. Commissioner needs to fetch games.</div>
-    </div>
-    <div class="picks-footer" id="picks-footer">
-      <div class="picks-progress"><strong id="picks-assigned-count">0</strong> / <span id="picks-total-count">0</span> assigned</div>
-      <button class="btn btn-primary" id="submit-picks-btn" onclick="submitPicks()" disabled>Submit Picks</button>
-    </div>
+    <div style="font-size:12px;color:var(--muted);">Locks <span id="picks-lock" style="color:var(--yellow);font-weight:600;">—</span></div>
+  </div>
+  <div id="picks-locked-msg" style="display:none;" class="card mt16">
+    <span style="color:var(--yellow);">⚠ Picks are locked for this week.</span>
+  </div>
+  <div id="games-list"><div style="text-align:center;padding:40px;color:var(--muted);">No games loaded yet.</div></div>
+  <div class="picks-footer" id="picks-footer">
+    <div class="progress"><strong id="cnt-assigned">0</strong> / <span id="cnt-total">0</span> assigned</div>
+    <button class="btn btn-green" id="submit-btn" onclick="submitPicks()" disabled>Submit Picks</button>
   </div>
 </div>
 
 <!-- STANDINGS -->
-<div id="view-standings" class="view">
-  <div class="view-inner">
-    <div class="section-label">Season</div>
-    <h2>Standings</h2>
-    <div class="week-nav">
-      <button class="btn btn-secondary" style="padding:6px 14px;" onclick="changeStandingsWeek(-1)">←</button>
-      <div class="week-nav-label" id="standings-week-label">Season Total</div>
-      <button class="btn btn-secondary" style="padding:6px 14px;" onclick="changeStandingsWeek(1)">→</button>
-    </div>
-    <div class="card" style="padding:0;overflow:hidden;">
-      <table class="standings-table">
-        <thead><tr><th style="width:36px;">#</th><th>Player</th><th class="right">Correct</th><th class="right">Points</th></tr></thead>
-        <tbody id="standings-body"><tr><td colspan="4" style="text-align:center;color:var(--muted);padding:24px;">No scores yet.</td></tr></tbody>
-      </table>
-    </div>
+<div id="page-standings" class="page">
+  <div class="label">Season</div>
+  <h2>Standings</h2>
+  <div class="week-nav">
+    <button class="btn btn-gray" style="padding:6px 14px" onclick="shiftWeek(-1)">←</button>
+    <div class="week-nav-label" id="standings-label">Season Total</div>
+    <button class="btn btn-gray" style="padding:6px 14px" onclick="shiftWeek(1)">→</button>
+  </div>
+  <div class="card" style="padding:0;overflow:hidden;">
+    <table>
+      <thead><tr><th style="width:32px">#</th><th>Player</th><th class="r">Correct</th><th class="r">Points</th></tr></thead>
+      <tbody id="standings-body"><tr><td colspan="4" style="text-align:center;color:var(--muted);padding:20px">No scores yet.</td></tr></tbody>
+    </table>
   </div>
 </div>
 
 <!-- LEAGUE -->
-<div id="view-league" class="view">
-  <div class="view-inner">
-    <div class="section-label">Your League</div>
-    <h2 id="league-name-heading">—</h2>
-    <div class="section-label">Invite Code</div>
-    <div class="passcode-display" id="league-passcode">------</div>
-    <p class="text-muted" style="text-align:center;margin-bottom:24px;">Share this code with friends to join.</p>
-    <hr class="divider" />
-    <div class="section-label">Members</div>
-    <div class="card" style="padding:0 20px;" id="members-list">
-      <div class="member-row" style="color:var(--muted);">Loading members…</div>
+<div id="page-league" class="page">
+  <div class="label">Your League</div>
+  <h2 id="league-name">Gridiron Confidence</h2>
+  <div class="divider"></div>
+  <div class="label">Commissioner Tools</div>
+  <div class="card">
+    <h2 style="font-size:18px;margin-bottom:14px;">Week Management</h2>
+    <div class="field">
+      <label>Week Number</label>
+      <input type="number" id="admin-week" min="1" max="18" value="1" style="width:80px" />
     </div>
-    <hr class="divider" />
-    <div class="section-label">Commissioner Tools</div>
-    <div class="card">
-      <h2 style="font-size:20px;margin-bottom:16px;">Week Management</h2>
-      <div class="field">
-        <label>Week Number</label>
-        <input type="number" id="admin-week-num" min="1" max="18" value="1" style="width:80px;" />
-      </div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;">
-        <button class="btn btn-primary" onclick="adminFetchGames()">Load Week Schedule</button>
-        <button class="btn btn-secondary" onclick="adminScoreWeek()">Score Week</button>
-        <button class="btn btn-secondary" onclick="adminEnterResults()">Enter Results</button>
-      </div>
-      <div class="error-msg" id="admin-fetch-error" style="margin-top:8px;"></div>
-      <div id="admin-fetch-result" class="mt-16" style="font-size:13px;color:var(--muted);"></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <button class="btn btn-green" onclick="loadWeek()">Load Week</button>
+      <button class="btn btn-gray"  onclick="enterResults()">Enter Results</button>
+      <button class="btn btn-gray"  onclick="scoreWeek()">Score Week</button>
     </div>
+    <div class="err-msg"  id="admin-err"></div>
+    <div class="info-msg" id="admin-info"></div>
   </div>
 </div>
 
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import {
-    getFirestore, doc, getDoc, setDoc, addDoc, updateDoc,
-    collection, query, where, getDocs, serverTimestamp, arrayUnion
-  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, doc, getDoc, setDoc, updateDoc, getDocs, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-  const firebaseConfig = {
-    apiKey:            "AIzaSyDkOj0NrlhyN8qwp00rI-2FPnvni0kqwqg",
-    authDomain:        "nfl-confidence-league.firebaseapp.com",
-    projectId:         "nfl-confidence-league",
-    storageBucket:     "nfl-confidence-league.firebasestorage.app",
-    messagingSenderId: "552146787356",
-    appId:             "1:552146787356:web:96bf4ef9f493631a2453d9"
-  };
+const app = initializeApp({
+  apiKey:            "AIzaSyDkOj0NrlhyN8qwp00rI-2FPnvni0kqwqg",
+  authDomain:        "nfl-confidence-league.firebaseapp.com",
+  projectId:         "nfl-confidence-league",
+  storageBucket:     "nfl-confidence-league.firebasestorage.app",
+  messagingSenderId: "552146787356",
+  appId:             "1:552146787356:web:96bf4ef9f493631a2453d9"
+});
+const db = getFirestore(app);
 
-  const app = initializeApp(firebaseConfig);
-  const db  = getFirestore(app);
+// ── CONFIG ──
+const LEAGUE_ID = "BFQuZxPRmgEbjNr1D25H";
 
-  // ── STATE ──
-  let currentLeague  = null;
-  let currentWeekDoc = null;
-  let userPicks      = {};
-  let standingsWeek  = 0;
-  // Hardcoded league ID for now — set after creating league
-  const LEAGUE_ID = localStorage.getItem('leagueId') || null;
+// ── STATE ──
+let league       = null;
+let weekDoc      = null;
+let userPicks    = {};
+let standingsWk  = 0;
+let userName     = localStorage.getItem('gcName') || null;
 
-  // ── BOOT ──
-  async function boot() {
-    if (LEAGUE_ID) {
-      const snap = await getDoc(doc(db, 'leagues', LEAGUE_ID));
-      if (snap.exists()) {
-        currentLeague = { id: snap.id, ...snap.data() };
-        renderHome();
-        renderLeague();
+// ── SCHEDULE ──
+const TEAMS = {
+  ARI:'Arizona Cardinals',ATL:'Atlanta Falcons',BAL:'Baltimore Ravens',
+  BUF:'Buffalo Bills',CAR:'Carolina Panthers',CHI:'Chicago Bears',
+  CIN:'Cincinnati Bengals',CLE:'Cleveland Browns',DAL:'Dallas Cowboys',
+  DEN:'Denver Broncos',DET:'Detroit Lions',GB:'Green Bay Packers',
+  HOU:'Houston Texans',IND:'Indianapolis Colts',JAX:'Jacksonville Jaguars',
+  KC:'Kansas City Chiefs',LV:'Las Vegas Raiders',LAR:'Los Angeles Rams',
+  LAC:'Los Angeles Chargers',MIA:'Miami Dolphins',MIN:'Minnesota Vikings',
+  NE:'New England Patriots',NO:'New Orleans Saints',NYG:'New York Giants',
+  NYJ:'New York Jets',PHI:'Philadelphia Eagles',PIT:'Pittsburgh Steelers',
+  SF:'San Francisco 49ers',SEA:'Seattle Seahawks',TB:'Tampa Bay Buccaneers',
+  TEN:'Tennessee Titans',WSH:'Washington Commanders'
+};
+
+const RAW = [
+  ['ARI','@LAC','SEA','@SF','@NYG','DET','@LAR','DEN','@DAL','@SEA','LAR','@KC','WSH','PHI','BYE','NYJ','@NO','LV','SF'],
+  ['ATL','@PIT','CAR','@GB','@NO','BAL','CHI','SF','@TB','CIN','KC','BYE','@MIN','DET','@CLE','@WSH','TB','NO','@CAR'],
+  ['BAL','@IND','NO','@DAL','TEN','@ATL','@CLE','CIN','@BUF','JAX','LAC','@CAR','@HOU','BYE','TB','@PIT','CLE','@CIN','PIT'],
+  ['BUF','@HOU','DET','LAC','NE','@LAR','@LV','BYE','BAL','@MIN','@NYJ','MIA','KC','@NE','@GB','CHI','@DEN','@MIA','NYJ'],
+  ['CAR','CHI','@ATL','@CLE','DET','BYE','@PHI','TB','@GB','DEN','@NO','BAL','@TB','@MIN','NO','CIN','@PIT','SEA','ATL'],
+  ['CHI','@CAR','MIN','PHI','NYJ','@GB','@ATL','NE','@SEA','TB','BYE','NO','@DET','JAX','@MIA','@BUF','GB','DET','@MIN'],
+  ['CIN','TB','@HOU','@PIT','JAX','@MIA','BYE','@BAL','TEN','@ATL','PIT','@WSH','NO','@CLE','KC','@CAR','@IND','BAL','CLE'],
+  ['CLE','@JAX','@TB','CAR','PIT','@NYJ','BAL','@TEN','@PIT','@NO','HOU','BYE','LV','CIN','ATL','@NYG','@BAL','IND','@CIN'],
+  ['DAL','@NYG','WSH','BAL','@HOU','TB','@GB','@PHI','ARI','@IND','SF','TEN','PHI','@SEA','BYE','@LAR','JAX','NYG','@WSH'],
+  ['DEN','@KC','JAX','LAR','@SF','@LAC','SEA','@ARI','KC','@CAR','BYE','LV','@PIT','MIA','@NYJ','@LV','BUF','@NE','LAC'],
+  ['DET','NO','@BUF','NYJ','@CAR','@ARI','BYE','GB','MIN','@MIA','NE','TB','CHI','@ATL','TEN','@MIN','NYG','@CHI','@GB'],
+  ['GB','@MIN','@NYJ','ATL','@TB','CHI','DAL','@DET','CAR','@NE','MIN','BYE','@LAR','@NO','BUF','MIA','@CHI','HOU','DET'],
+  ['HOU','BUF','CIN','@IND','DAL','@TEN','@JAX','NYG','BYE','@LAC','@CLE','IND','BAL','@PIT','@WSH','JAX','@PHI','@GB','TEN'],
+  ['IND','BAL','@KC','HOU','@WSH','@PIT','TEN','@MIN','@JAX','DAL','MIA','@HOU','NYG','BYE','@PHI','@TEN','CIN','@CLE','JAX'],
+  ['JAX','CLE','@DEN','NE','@CIN','PHI','HOU','BYE','IND','@BAL','@TEN','@NYG','TEN','@CHI','PIT','@HOU','@DAL','WSH','@IND'],
+  ['KC','DEN','IND','@MIA','@LV','BYE','LAC','@SEA','@DEN','NYJ','@ATL','ARI','@BUF','@LAR','@CIN','NE','SF','@LAC','LV'],
+  ['LV','MIA','@LAC','@NO','KC','@NE','BUF','LAR','@NYJ','@SF','SEA','@DEN','@CLE','BYE','LAC','DEN','TEN','@ARI','@KC'],
+  ['LAR','SF','NYG','@DEN','@PHI','BUF','ARI','@LV','LAC','@WSH','@ARI','BYE','GB','KC','@SF','DAL','@SEA','@TB','SEA'],
+  ['LAC','ARI','LV','@BUF','@SEA','DEN','@KC','BYE','@LAR','HOU','@BAL','NYJ','NE','@TB','@LV','SF','@MIA','KC','@DEN'],
+  ['MIA','@LV','@SF','KC','@MIN','CIN','BYE','@NYJ','NE','DET','@IND','@BUF','NYJ','@DEN','CHI','@GB','LAC','BUF','@NE'],
+  ['MIN','GB','@CHI','@TB','MIA','@NO','BYE','IND','@DET','BUF','@GB','@SF','ATL','CAR','@NE','DET','WSH','@NYJ','CHI'],
+  ['NE','@SEA','PIT','@JAX','@BUF','LV','NYJ','@CHI','@MIA','GB','@DET','BYE','@LAC','BUF','MIN','@KC','@NYJ','DEN','MIA'],
+  ['NO','@DET','@BAL','LV','ATL','MIN','@NYG','PIT','BYE','CLE','CAR','@CHI','@CIN','GB','@CAR','@TB','ARI','@ATL','TB'],
+  ['NYG','DAL','@LAR','TEN','ARI','@WSH','NO','@HOU','BYE','@PHI','WSH','JAX','@IND','SF','@SEA','CLE','@DET','@DAL','PHI'],
+  ['NYJ','@TEN','GB','@DET','@CHI','CLE','@NE','MIA','LV','@KC','BUF','@LAC','@MIA','BYE','DEN','@ARI','NE','MIN','@BUF'],
+  ['PHI','WSH','@TEN','@CHI','LAR','@JAX','CAR','DAL','@WSH','NYG','BYE','PIT','@DAL','@ARI','IND','SEA','HOU','@SF','@NYG'],
+  ['PIT','ATL','@NE','CIN','@CLE','IND','@TB','@NO','CLE','BYE','@CIN','@PHI','DEN','HOU','@JAX','BAL','CAR','@TEN','@BAL'],
+  ['SF','@LAR','MIA','ARI','DEN','@SEA','WSH','@ATL','BYE','LV','@DAL','MIN','SEA','@NYG','LAR','@LAC','@KC','PHI','@ARI'],
+  ['SEA','NE','@ARI','@WSH','LAC','SF','@DEN','KC','CHI','ARI','@LV','BYE','@SF','DAL','NYG','@PHI','LAR','@CAR','@LAR'],
+  ['TB','@CIN','CLE','MIN','GB','@DAL','PIT','@CAR','ATL','@CHI','BYE','@DET','CAR','LAC','@BAL','NO','@ATL','LAR','@NO'],
+  ['TEN','NYJ','PHI','@NYG','@BAL','HOU','@IND','CLE','@CIN','BYE','JAX','@DAL','@JAX','WSH','@DET','IND','@LV','PIT','@HOU'],
+  ['WSH','@PHI','@DAL','SEA','IND','NYG','@SF','BYE','PHI','LAR','@NYG','CIN','@ARI','@TEN','HOU','ATL','@MIN','@JAX','DAL']
+];
+
+function buildSchedule() {
+  const sched = {};
+  for (const row of RAW) {
+    sched[row[0]] = row.slice(1);
+  }
+  const weeks = {};
+  for (let wi = 0; wi < 18; wi++) {
+    const wn = wi + 1;
+    const seen = new Set();
+    const games = [];
+    for (const [team, opps] of Object.entries(sched)) {
+      const oppRaw = opps[wi];
+      if (!oppRaw || oppRaw === 'BYE') continue;
+      const away = oppRaw.startsWith('@');
+      const opp = oppRaw.replace('@','');
+      const awayT = away ? team : opp;
+      const homeT = away ? opp : team;
+      const key = [awayT,homeT].sort().join('-');
+      if (!seen.has(key)) {
+        seen.add(key);
+        games.push({ gameId:`W${wn}_${awayT}_${homeT}`, awayTeam:awayT, awayFull:TEAMS[awayT]||awayT, homeTeam:homeT, homeFull:TEAMS[homeT]||homeT, result:null, completed:false, awayScore:null, homeScore:null });
       }
     }
+    weeks[wn] = games;
   }
-  boot();
+  return weeks;
+}
+const SCHEDULE = buildSchedule();
 
-  // ── NAV ──
-  window.navigate = function(view) {
-    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-    document.getElementById('view-' + view).classList.add('active');
-    document.querySelectorAll('.nav-link').forEach(l => l.classList.toggle('active', l.dataset.view === view));
-    if (view === 'home')      renderHome();
-    if (view === 'picks')     renderPicks();
-    if (view === 'standings') renderStandings();
-    if (view === 'league')    renderLeague();
-  };
-
-  // ── HOME ──
-  async function renderHome() {
-    if (!currentLeague) return;
-    document.getElementById('home-week-badge').textContent = `Week ${currentLeague.currentWeek || '—'}`;
-    renderStandingsTable('home-standings-body', true);
-  }
-
-  // ── CURRENT WEEK ──
-  async function loadCurrentWeek() {
-    if (!currentLeague?.currentWeek) return;
-    const snap = await getDoc(doc(db, 'leagues', currentLeague.id, 'weeks', String(currentLeague.currentWeek)));
-    currentWeekDoc = snap.exists() ? snap.data() : null;
-  }
-
-  // ── PICKS ──
-  async function renderPicks() {
-    if (!currentLeague) { document.getElementById('games-list').innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted);">No league loaded.</div>'; return; }
-    await loadCurrentWeek();
-    document.getElementById('picks-week-num').textContent = currentLeague.currentWeek || '—';
-    const games    = currentWeekDoc?.games || [];
-    const isLocked = currentWeekDoc?.isLocked || false;
-    document.getElementById('picks-locked-banner').style.display = isLocked ? '' : 'none';
-    const list = document.getElementById('games-list');
-    if (!games.length) { list.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted);">No games loaded for this week yet.</div>'; return; }
-    document.getElementById('picks-total-count').textContent = games.length;
-    if (currentWeekDoc?.lockTime) {
-      const d = new Date(currentWeekDoc.lockTime);
-      document.getElementById('picks-lock-time').textContent = d.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric', hour:'numeric', minute:'2-digit' });
+// ── BOOT ──
+async function boot() {
+  try {
+    const snap = await getDoc(doc(db, 'leagues', LEAGUE_ID));
+    if (snap.exists()) {
+      league = { id: snap.id, ...snap.data() };
+      renderHome();
     }
-    list.innerHTML = games.map(g => buildGameCard(g, isLocked)).join('');
-    updatePicksProgress();
-    updateSubmitBtn();
+  } catch(e) { console.error('boot error', e); }
+}
+boot();
+
+// ── NAV ──
+window.go = function(p) {
+  document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
+  document.getElementById('page-' + p).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.p === p));
+  if (p === 'home')      renderHome();
+  if (p === 'picks')     renderPicks();
+  if (p === 'standings') renderStandings();
+  if (p === 'league')    renderLeague();
+};
+
+// ── HOME ──
+async function renderHome() {
+  if (!league) return;
+  document.getElementById('home-badge').textContent = `Week ${league.currentWeek || '—'}`;
+  // pick status
+  if (userName) {
+    const pid = `${userName.replace(/\s+/g,'_')}_W${league.currentWeek}`;
+    const ps = await getDoc(doc(db,'leagues',LEAGUE_ID,'picks',pid));
+    const dot = document.getElementById('home-dot');
+    const st  = document.getElementById('home-status');
+    if (ps.exists()) { dot.className='dot green'; st.textContent='Picks submitted — good luck.'; }
+    else             { dot.className='dot'; st.textContent='Picks not submitted yet.'; }
+  } else {
+    document.getElementById('home-status').textContent = 'Set your name in Picks to track status.';
   }
+  loadStandingsTable('home-standings', true);
+}
 
-  function buildGameCard(game, locked, scoredPick) {
-    const isScored = scoredPick && scoredPick.correct !== null && scoredPick.correct !== undefined;
-    const pick = scoredPick || userPicks[game.gameId] || {};
-    const awaySelected = pick.pickedTeam === game.awayTeam ? 'selected' : '';
-    const homeSelected = pick.pickedTeam === game.homeTeam ? 'selected' : '';
-    const confVal  = pick.confidencePoints || '';
-    const confClass = confVal ? 'assigned' : '';
-    const lockedClass = (locked || isScored) ? 'locked' : '';
-    const pickedClass = pick.pickedTeam ? 'picked' : '';
-    const scoredClass = isScored ? (scoredPick.correct ? 'correct' : 'wrong') : '';
-    const opts = Array.from({length: currentWeekDoc.games.length}, (_, i) => i + 1)
-      .map(n => `<option value="${n}" ${confVal == n ? 'selected' : ''}>${n}</option>`).join('');
-    return `
-      <div class="game-card ${pickedClass} ${lockedClass} ${scoredClass}" id="card-${game.gameId}">
-        <div class="team-block away">
-          <div class="team-abbr">${game.awayTeam}</div>
-          <div class="team-full">${game.awayFull || ''}</div>
-          <button class="team-pick-btn ${awaySelected} mt-8" onclick="pickTeam('${game.gameId}','${game.awayTeam}')">Pick</button>
-        </div>
-        <div class="at-sign">@</div>
-        <div class="team-block home">
-          <div class="team-abbr">${game.homeTeam}</div>
-          <div class="team-full">${game.homeFull || ''}</div>
-          <button class="team-pick-btn ${homeSelected} mt-8" onclick="pickTeam('${game.gameId}','${game.homeTeam}')">Pick</button>
-        </div>
-        <div style="display:flex;flex-direction:column;align-items:center;">
-          <select class="conf-select ${confClass}" id="conf-${game.gameId}" onchange="setConfidence('${game.gameId}',this.value)" ${isScored ? 'disabled' : ''}>
-            <option value="">—</option>${opts}
-          </select>
-          ${isScored ? `<div class="points-earned ${scoredPick.correct ? 'correct' : 'wrong'}">${scoredPick.correct ? '+'+scoredPick.pointsEarned : '0'} pts</div>` : ''}
-          ${game.completed && game.awayScore !== null ? `<div class="score-display">${game.awayScore}-${game.homeScore}</div>` : ''}
-        </div>
-      </div>`;
+// ── WEEK ──
+async function loadWeekDoc() {
+  if (!league?.currentWeek) return;
+  const s = await getDoc(doc(db,'leagues',LEAGUE_ID,'weeks',String(league.currentWeek)));
+  weekDoc = s.exists() ? s.data() : null;
+}
+
+// ── PICKS ──
+async function renderPicks() {
+  if (!league) { document.getElementById('games-list').innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted)">No league found.</div>'; return; }
+  await loadWeekDoc();
+  document.getElementById('picks-week').textContent = league.currentWeek || '—';
+  const games    = weekDoc?.games || [];
+  const isLocked = weekDoc?.isLocked || false;
+  document.getElementById('picks-locked-msg').style.display = isLocked ? '' : 'none';
+  const list = document.getElementById('games-list');
+  if (!games.length) { list.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted)">No games loaded. Use League → Load Week.</div>'; return; }
+  document.getElementById('cnt-total').textContent = games.length;
+
+  // load existing picks
+  if (userName) {
+    const pid = `${userName.replace(/\s+/g,'_')}_W${league.currentWeek}`;
+    const ps = await getDoc(doc(db,'leagues',LEAGUE_ID,'picks',pid));
+    userPicks = {};
+    if (ps.exists()) {
+      const d = ps.data();
+      // if scored, show results
+      if (d.scored) { showResults(d, games); return; }
+      (d.picks||[]).forEach(p => { userPicks[p.gameId] = { pickedTeam:p.pickedTeam, confidencePoints:p.confidencePoints }; });
+    }
   }
+  list.innerHTML = games.map(g => gameCard(g, isLocked)).join('');
+  updateProgress(); updateSubmit();
+}
 
-  window.pickTeam = function(gameId, team) {
-    if (!userPicks[gameId]) userPicks[gameId] = {};
-    userPicks[gameId].pickedTeam = team;
-    const game = currentWeekDoc.games.find(g => g.gameId === gameId);
-    const card = document.getElementById('card-' + gameId);
-    if (card && game) card.outerHTML = buildGameCard(game, false);
-    updatePicksProgress(); updateSubmitBtn();
-  };
+function gameCard(g, locked, sp) {
+  const isScored = sp && sp.correct !== null && sp.correct !== undefined;
+  const pick = sp || userPicks[g.gameId] || {};
+  const asel = pick.pickedTeam === g.awayTeam ? 'on' : '';
+  const hsel = pick.pickedTeam === g.homeTeam ? 'on' : '';
+  const cv   = pick.confidencePoints || '';
+  const total = weekDoc?.games?.length || 16;
+  const opts  = Array.from({length:total},(_,i)=>i+1).map(n=>`<option value="${n}" ${cv==n?'selected':''}>${n}</option>`).join('');
+  const sc    = isScored ? (sp.correct ? 'correct' : 'wrong') : '';
+  const lk    = (locked||isScored) ? 'locked' : '';
+  const pk    = pick.pickedTeam ? 'picked' : '';
+  return `<div class="game-card ${pk} ${lk} ${sc}" id="gc-${g.gameId}">
+    <div class="team away">
+      <div class="abbr">${g.awayTeam}</div>
+      <div class="full-name">${g.awayFull}</div>
+      <button class="pick-btn ${asel}" onclick="pickTeam('${g.gameId}','${g.awayTeam}')">Pick</button>
+    </div>
+    <div class="at">@</div>
+    <div class="team home">
+      <div class="abbr">${g.homeTeam}</div>
+      <div class="full-name">${g.homeFull}</div>
+      <button class="pick-btn ${hsel}" onclick="pickTeam('${g.gameId}','${g.homeTeam}')">Pick</button>
+    </div>
+    <div class="conf-wrap">
+      <select class="conf-sel ${cv?'set':''}" id="cs-${g.gameId}" onchange="setConf('${g.gameId}',this.value)" ${isScored?'disabled':''}>
+        <option value="">—</option>${opts}
+      </select>
+      ${isScored ? `<div class="pts-earned ${sp.correct?'correct':'wrong'}">${sp.correct?'+'+sp.pointsEarned:'0'} pts</div>` : ''}
+      ${g.completed&&g.awayScore!==null ? `<div class="score">${g.awayScore}-${g.homeScore}</div>` : ''}
+    </div>
+  </div>`;
+}
 
-  window.setConfidence = function(gameId, val) {
-    if (!userPicks[gameId]) userPicks[gameId] = {};
-    const num = parseInt(val);
-    if (num) {
-      Object.keys(userPicks).forEach(gid => {
-        if (gid !== gameId && userPicks[gid].confidencePoints === num) {
-          userPicks[gid].confidencePoints = null;
-          const sel = document.getElementById('conf-' + gid);
-          if (sel) { sel.value = ''; sel.className = 'conf-select'; }
-        }
-      });
-      userPicks[gameId].confidencePoints = num;
-      const sel = document.getElementById('conf-' + gameId);
-      if (sel) sel.className = 'conf-select assigned';
+function showResults(d, games) {
+  const sm = {};
+  (d.scoredPicks||[]).forEach(p => { sm[p.gameId]=p; });
+  const list = document.getElementById('games-list');
+  list.innerHTML = `<div class="week-summary">
+    <div class="sum-stat"><div class="sum-val">${d.weekPoints||0}</div><div class="sum-lbl">Points</div></div>
+    <div class="sum-stat"><div class="sum-val">${d.weekCorrect||0}/${games.length}</div><div class="sum-lbl">Correct</div></div>
+  </div>` + games.map(g => gameCard(g, true, sm[g.gameId])).join('');
+  document.getElementById('picks-footer').style.display = 'none';
+}
+
+window.pickTeam = function(gid, team) {
+  if (!userPicks[gid]) userPicks[gid] = {};
+  userPicks[gid].pickedTeam = team;
+  const g = weekDoc.games.find(x => x.gameId===gid);
+  const el = document.getElementById('gc-'+gid);
+  if (el && g) el.outerHTML = gameCard(g, false);
+  updateProgress(); updateSubmit();
+};
+
+window.setConf = function(gid, val) {
+  if (!userPicks[gid]) userPicks[gid] = {};
+  const num = parseInt(val);
+  if (num) {
+    Object.keys(userPicks).forEach(id => {
+      if (id !== gid && userPicks[id].confidencePoints === num) {
+        userPicks[id].confidencePoints = null;
+        const s = document.getElementById('cs-'+id);
+        if (s) { s.value=''; s.className='conf-sel'; }
+      }
+    });
+    userPicks[gid].confidencePoints = num;
+    const s = document.getElementById('cs-'+gid);
+    if (s) s.className = 'conf-sel set';
+  } else {
+    userPicks[gid].confidencePoints = null;
+    const s = document.getElementById('cs-'+gid);
+    if (s) s.className = 'conf-sel';
+  }
+  updateProgress(); updateSubmit();
+};
+
+function updateProgress() {
+  const n = Object.values(userPicks).filter(p=>p.pickedTeam&&p.confidencePoints).length;
+  document.getElementById('cnt-assigned').textContent = n;
+}
+
+function updateSubmit() {
+  const total = weekDoc?.games?.length || 0;
+  const done  = Object.values(userPicks).filter(p=>p.pickedTeam&&p.confidencePoints).length;
+  const btn   = document.getElementById('submit-btn');
+  btn.disabled = done < total;
+  btn.textContent = done < total ? `Submit Picks (${total-done} left)` : 'Submit Picks';
+}
+
+window.submitPicks = async function() {
+  if (!userName) {
+    const n = prompt('Enter your name:');
+    if (!n) return;
+    userName = n.trim();
+    localStorage.setItem('gcName', userName);
+  }
+  const total = weekDoc?.games?.length || 0;
+  const arr   = Object.entries(userPicks).map(([gameId,p])=>({gameId,pickedTeam:p.pickedTeam,confidencePoints:p.confidencePoints}));
+  if (arr.length < total) { toast('Complete all picks first.','err'); return; }
+  const pid = `${userName.replace(/\s+/g,'_')}_W${league.currentWeek}`;
+  try {
+    await setDoc(doc(db,'leagues',LEAGUE_ID,'picks',pid), { userId:pid, displayName:userName, weekNumber:league.currentWeek, submittedAt:serverTimestamp(), picks:arr });
+    toast('Picks submitted!','ok');
+  } catch(e) { toast('Error submitting.','err'); console.error(e); }
+};
+
+// ── STANDINGS ──
+async function renderStandings() {
+  await loadStandingsTable('standings-body', false);
+  document.getElementById('standings-label').textContent = standingsWk === 0 ? 'Season Total' : `Week ${standingsWk}`;
+}
+
+async function loadStandingsTable(tbodyId, compact) {
+  if (!league) return;
+  const tbody = document.getElementById(tbodyId);
+  if (!tbody) return;
+  const snap = await getDocs(collection(db,'leagues',LEAGUE_ID,'standings'));
+  let rows = [];
+  snap.forEach(d => rows.push(d.data()));
+  rows.sort((a,b)=>(b.totalPoints||0)-(a.totalPoints||0));
+  if (!rows.length) { tbody.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:20px">No scores yet.</td></tr>'; return; }
+  if (compact) rows = rows.slice(0,5);
+  tbody.innerHTML = rows.map((r,i)=>`<tr>
+    <td><div class="rank ${i<3?'hi':''}">${i+1}</div></td>
+    <td>${r.displayName||'?'}</td>
+    <td class="r" style="color:var(--muted);font-size:13px">${standingsWk===0 ? (r.totalCorrect||0) : (r.weeklyBreakdown?.[standingsWk]?.correct??'—')}</td>
+    <td class="r"><div class="pts">${standingsWk===0 ? (r.totalPoints||0) : (r.weeklyBreakdown?.[standingsWk]?.points||0)}</div></td>
+  </tr>`).join('');
+}
+
+window.shiftWeek = function(d) {
+  const max = league?.currentWeek||1;
+  standingsWk = Math.max(0, Math.min(max, standingsWk+d));
+  renderStandings();
+};
+
+// ── LEAGUE ──
+function renderLeague() {
+  if (league) document.getElementById('league-name').textContent = league.name || 'Gridiron Confidence';
+}
+
+// ── LOAD WEEK ──
+window.loadWeek = async function() {
+  const wn = parseInt(document.getElementById('admin-week').value);
+  const err = document.getElementById('admin-err');
+  const inf = document.getElementById('admin-info');
+  err.textContent=''; inf.textContent='Loading...';
+  const games = SCHEDULE[wn];
+  if (!games?.length) { err.textContent='No games for that week.'; inf.textContent=''; return; }
+  try {
+    await setDoc(doc(db,'leagues',LEAGUE_ID,'weeks',String(wn)), { weekNumber:wn, games, isLocked:false, fetchedAt:serverTimestamp() });
+    if (wn >= (league?.currentWeek||1)) {
+      await updateDoc(doc(db,'leagues',LEAGUE_ID), { currentWeek:wn });
+      if (league) league.currentWeek = wn;
+    }
+    inf.textContent = `✓ ${games.length} games loaded for Week ${wn}.`;
+    toast(`Week ${wn} loaded!`,'ok');
+  } catch(e) { err.textContent='Error: '+e.message; inf.textContent=''; console.error(e); }
+};
+
+// ── ENTER RESULTS ──
+window.enterResults = async function() {
+  const wn = parseInt(document.getElementById('admin-week').value);
+  const err = document.getElementById('admin-err');
+  err.textContent='';
+  const ws = await getDoc(doc(db,'leagues',LEAGUE_ID,'weeks',String(wn)));
+  if (!ws.exists()) { err.textContent='Load the week first.'; return; }
+  const wd = ws.data();
+  const updated = wd.games.map(g => {
+    const w = prompt(`${g.awayTeam} @ ${g.homeTeam}\nWinner? (type team abbreviation, or leave blank)`);
+    if (!w) return {...g, result:null, completed:false};
+    const wu = w.trim().toUpperCase();
+    const result = wu===g.awayTeam?'away':wu===g.homeTeam?'home':null;
+    return {...g, result, completed:!!result};
+  });
+  await setDoc(doc(db,'leagues',LEAGUE_ID,'weeks',String(wn)), {...wd, games:updated, fetchedAt:serverTimestamp()});
+  toast('Results saved!','ok');
+};
+
+// ── SCORE WEEK ──
+window.scoreWeek = async function() {
+  const wn = parseInt(document.getElementById('admin-week').value);
+  const err = document.getElementById('admin-err');
+  const inf = document.getElementById('admin-info');
+  err.textContent=''; inf.textContent='Scoring...';
+  const ws = await getDoc(doc(db,'leagues',LEAGUE_ID,'weeks',String(wn)));
+  if (!ws.exists()) { err.textContent='Load the week first.'; inf.textContent=''; return; }
+  const wd = ws.data();
+  const rm = {};
+  wd.games.forEach(g => { rm[g.gameId]={result:g.result,awayTeam:g.awayTeam,homeTeam:g.homeTeam}; });
+  const ps = await getDocs(collection(db,'leagues',LEAGUE_ID,'picks'));
+  const wp = [];
+  ps.forEach(d => { const pd=d.data(); if(pd.weekNumber===wn) wp.push({id:d.id,...pd}); });
+  if (!wp.length) { inf.textContent='No picks submitted for this week.'; return; }
+  let scored=0;
+  for (const pd of wp) {
+    let pts=0, correct=0;
+    const sp = (pd.picks||[]).map(p => {
+      const g=rm[p.gameId];
+      if (!g||!g.result) return {...p,correct:null,pointsEarned:0};
+      const side = p.pickedTeam===g.awayTeam?'away':p.pickedTeam===g.homeTeam?'home':null;
+      const ok = side===g.result;
+      const earned = ok?p.confidencePoints:0;
+      pts+=earned; if(ok) correct++;
+      return {...p,correct:ok,pointsEarned:earned};
+    });
+    await updateDoc(doc(db,'leagues',LEAGUE_ID,'picks',pd.id), {scoredPicks:sp,weekPoints:pts,weekCorrect:correct,scored:true});
+    const sr = doc(db,'leagues',LEAGUE_ID,'standings',pd.userId);
+    const ss = await getDoc(sr);
+    if (ss.exists()) {
+      const ex=ss.data(); const bd=ex.weeklyBreakdown||{};
+      bd[wn]={points:pts,correct};
+      await updateDoc(sr,{totalPoints:Object.values(bd).reduce((s,w)=>s+(w.points||0),0),totalCorrect:Object.values(bd).reduce((s,w)=>s+(w.correct||0),0),weeklyBreakdown:bd,displayName:pd.displayName,userId:pd.userId});
     } else {
-      userPicks[gameId].confidencePoints = null;
-      const sel = document.getElementById('conf-' + gameId);
-      if (sel) sel.className = 'conf-select';
+      await setDoc(sr,{userId:pd.userId,displayName:pd.displayName,totalPoints:pts,totalCorrect:correct,weeklyBreakdown:{[wn]:{points:pts,correct}}});
     }
-    updatePicksProgress(); updateSubmitBtn();
-  };
-
-  function updatePicksProgress() {
-    const assigned = Object.values(userPicks).filter(p => p.pickedTeam && p.confidencePoints).length;
-    document.getElementById('picks-assigned-count').textContent = assigned;
+    scored++;
   }
+  inf.textContent=`✓ Week ${wn} scored — ${scored} entries updated.`;
+  toast(`Week ${wn} scored!`,'ok');
+};
 
-  function updateSubmitBtn() {
-    const total = currentWeekDoc?.games?.length || 0;
-    const assigned = Object.values(userPicks).filter(p => p.pickedTeam && p.confidencePoints).length;
-    const btn = document.getElementById('submit-picks-btn');
-    btn.disabled = assigned < total;
-    btn.textContent = assigned < total ? `Submit Picks (${total - assigned} left)` : 'Submit Picks';
-  }
-
-  async function submitPicks() {
-    const total = currentWeekDoc?.games?.length || 0;
-    const picksArr = Object.entries(userPicks).map(([gameId, p]) => ({ gameId, pickedTeam: p.pickedTeam, confidencePoints: p.confidencePoints }));
-    if (picksArr.length < total) { toast('Complete all picks first.', 'error'); return; }
-    const name = prompt('Enter your name:');
-    if (!name) return;
-    const pickId = `${name.replace(/\s+/g,'_')}_${currentLeague.currentWeek}`;
-    try {
-      await setDoc(doc(db, 'leagues', currentLeague.id, 'picks', pickId), {
-        userId: pickId, displayName: name, weekNumber: currentLeague.currentWeek,
-        submittedAt: serverTimestamp(), picks: picksArr
-      });
-      toast('Picks submitted!', 'success');
-    } catch(e) { toast('Error submitting picks.', 'error'); console.error(e); }
-  }
-
-  // ── STANDINGS ──
-  async function renderStandings() {
-    await renderStandingsTable('standings-body', false);
-    document.getElementById('standings-week-label').textContent = standingsWeek === 0 ? 'Season Total' : `Week ${standingsWeek}`;
-  }
-
-  async function renderStandingsTable(tbodyId, compact) {
-    if (!currentLeague) return;
-    const tbody = document.getElementById(tbodyId);
-    if (!tbody) return;
-    const snap = await getDocs(collection(db, 'leagues', currentLeague.id, 'standings'));
-    let rows = [];
-    snap.forEach(d => rows.push({ id: d.id, ...d.data() }));
-    rows.sort((a, b) => (b.totalPoints || 0) - (a.totalPoints || 0));
-    if (!rows.length) { tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:24px;">No scores yet.</td></tr>`; return; }
-    if (compact) rows = rows.slice(0, 5);
-    tbody.innerHTML = rows.map((r, i) => `
-      <tr>
-        <td><div class="rank-num ${i < 3 ? 'top' : ''}">${i+1}</div></td>
-        <td>${r.displayName || 'Unknown'}</td>
-        <td class="right" style="color:var(--muted);font-size:13px;">${r.weeklyBreakdown?.[currentLeague.currentWeek]?.correct ?? '—'}</td>
-        <td class="right"><div class="pts-val">${r.totalPoints || 0}</div></td>
-      </tr>`).join('');
-  }
-
-  window.changeStandingsWeek = function(dir) {
-    const max = currentLeague?.currentWeek || 1;
-    standingsWeek = Math.max(0, Math.min(max, standingsWeek + dir));
-    renderStandings();
-  };
-
-  // ── LEAGUE ──
-  async function renderLeague() {
-    if (!currentLeague) {
-      document.getElementById('league-name-heading').textContent = 'No league loaded';
-      return;
-    }
-    document.getElementById('league-name-heading').textContent = currentLeague.name || '—';
-    document.getElementById('league-passcode').textContent = currentLeague.passcode || '——';
-    const membersList = document.getElementById('members-list');
-    membersList.innerHTML = (currentLeague.members || []).map(m => `<div class="member-row"><span>${m}</span></div>`).join('') || '<div class="member-row" style="color:var(--muted);">No members yet.</div>';
-  }
-
-  // ── ESPN FETCH ──
-  window.adminFetchGames = async function() {
-    const weekNum = parseInt(document.getElementById('admin-week-num').value);
-    const errEl = document.getElementById('admin-fetch-error');
-    const resEl = document.getElementById('admin-fetch-result');
-    errEl.textContent = ''; resEl.textContent = 'Fetching from ESPN…';
-    if (!currentLeague) { errEl.textContent = 'No league loaded.'; resEl.textContent = ''; return; }
-    try {
-      const url = `https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard?seasontype=2&week=${weekNum}&season=2025`;
-      const res = await fetch(url);
-      const data = await res.json();
-      const events = data.events || [];
-      if (!events.length) { errEl.textContent = 'No games found.'; resEl.textContent = ''; return; }
-      const games = events.map(ev => {
-        const comps = ev.competitions[0];
-        const away = comps.competitors.find(c => c.homeAway === 'away');
-        const home = comps.competitors.find(c => c.homeAway === 'home');
-        const result = comps.status.type.completed ? (parseInt(away.score) > parseInt(home.score) ? 'away' : 'home') : null;
-        return { gameId: ev.id, awayTeam: away.team.abbreviation, awayFull: away.team.displayName, homeTeam: home.team.abbreviation, homeFull: home.team.displayName, kickoff: ev.date, result };
-      });
-      await setDoc(doc(db, 'leagues', currentLeague.id, 'weeks', String(weekNum)), { weekNumber: weekNum, games, lockTime: games[0].kickoff, isLocked: false, fetchedAt: serverTimestamp() });
-      if (weekNum >= (currentLeague.currentWeek || 1)) {
-        await updateDoc(doc(db, 'leagues', currentLeague.id), { currentWeek: weekNum });
-        currentLeague.currentWeek = weekNum;
-      }
-      resEl.textContent = `✓ ${games.length} games loaded for Week ${weekNum}.`;
-      toast(`Week ${weekNum} loaded!`, 'success');
-    } catch(e) { errEl.textContent = 'Error fetching from ESPN.'; resEl.textContent = ''; console.error(e); }
-  };
-
-  // ── SCORE WEEK ──
-  window.adminScoreWeek = async function() {
-    const weekNum = parseInt(document.getElementById('admin-week-num').value);
-    const errEl = document.getElementById('admin-fetch-error');
-    const resEl = document.getElementById('admin-fetch-result');
-    errEl.textContent = ''; resEl.textContent = 'Scoring…';
-    if (!currentLeague) { errEl.textContent = 'No league loaded.'; return; }
-    try {
-      const url = `https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard?seasontype=2&week=${weekNum}&season=2025`;
-      const res = await fetch(url); const data = await res.json();
-      const events = data.events || [];
-      if (!events.length) { errEl.textContent = 'No games found.'; resEl.textContent = ''; return; }
-      const resultMap = {};
-      const updatedGames = events.map(ev => {
-        const comps = ev.competitions[0];
-        const away = comps.competitors.find(c => c.homeAway === 'away');
-        const home = comps.competitors.find(c => c.homeAway === 'home');
-        const result = comps.status.type.completed ? (parseInt(away.score) > parseInt(home.score) ? 'away' : 'home') : null;
-        resultMap[ev.id] = { result, awayTeam: away.team.abbreviation, homeTeam: home.team.abbreviation };
-        return { gameId: ev.id, awayTeam: away.team.abbreviation, awayFull: away.team.displayName, awayScore: away.score || null, homeTeam: home.team.abbreviation, homeFull: home.team.displayName, homeScore: home.score || null, kickoff: ev.date, result, completed: comps.status.type.completed };
-      });
-      const anyStarted = updatedGames.some(g => new Date(g.kickoff) <= new Date());
-      await setDoc(doc(db, 'leagues', currentLeague.id, 'weeks', String(weekNum)), { weekNumber: weekNum, games: updatedGames, lockTime: updatedGames[0].kickoff, isLocked: anyStarted, allFinal: updatedGames.every(g => g.completed), fetchedAt: serverTimestamp() });
-      const picksSnap = await getDocs(collection(db, 'leagues', currentLeague.id, 'picks'));
-      const weekPicks = [];
-      picksSnap.forEach(d => { const pd = d.data(); if (pd.weekNumber === weekNum) weekPicks.push({ id: d.id, ...pd }); });
-      if (!weekPicks.length) { resEl.textContent = `Results updated. No picks yet for Week ${weekNum}.`; return; }
-      let scored = 0;
-      for (const pickDoc of weekPicks) {
-        let weekPoints = 0, weekCorrect = 0;
-        const scoredPicks = pickDoc.picks.map(p => {
-          const game = resultMap[p.gameId];
-          if (!game || !game.result) return { ...p, correct: null, pointsEarned: 0 };
-          const pickedSide = p.pickedTeam === game.awayTeam ? 'away' : p.pickedTeam === game.homeTeam ? 'home' : null;
-          const correct = pickedSide === game.result;
-          const pointsEarned = correct ? p.confidencePoints : 0;
-          weekPoints += pointsEarned; if (correct) weekCorrect++;
-          return { ...p, correct, pointsEarned };
-        });
-        await updateDoc(doc(db, 'leagues', currentLeague.id, 'picks', pickDoc.id), { scoredPicks, weekPoints, weekCorrect, scored: true });
-        const standingsRef = doc(db, 'leagues', currentLeague.id, 'standings', pickDoc.userId);
-        const standingsSnap = await getDoc(standingsRef);
-        if (standingsSnap.exists()) {
-          const ex = standingsSnap.data(); const bd = ex.weeklyBreakdown || {};
-          bd[weekNum] = { points: weekPoints, correct: weekCorrect };
-          await updateDoc(standingsRef, { totalPoints: Object.values(bd).reduce((s,w) => s+(w.points||0),0), totalCorrect: Object.values(bd).reduce((s,w) => s+(w.correct||0),0), weeklyBreakdown: bd, displayName: pickDoc.displayName, userId: pickDoc.userId });
-        } else {
-          await setDoc(standingsRef, { userId: pickDoc.userId, displayName: pickDoc.displayName, totalPoints: weekPoints, totalCorrect: weekCorrect, weeklyBreakdown: { [weekNum]: { points: weekPoints, correct: weekCorrect } } });
-        }
-        scored++;
-      }
-      resEl.textContent = `✓ Week ${weekNum} scored — ${scored} entries updated.`;
-      toast(`Week ${weekNum} scored!`, 'success');
-    } catch(e) { errEl.textContent = 'Scoring error.'; resEl.textContent = ''; console.error(e); }
-  };
-
-  // ── ENTER RESULTS MANUALLY ──
-  window.adminEnterResults = async function() {
-    const weekNum = parseInt(document.getElementById('admin-week-num').value);
-    const weekSnap = await getDoc(doc(db, 'leagues', currentLeague.id, 'weeks', String(weekNum)));
-    if (!weekSnap.exists()) { alert('Load the week schedule first.'); return; }
-    const weekData = weekSnap.data();
-    const games = weekData.games;
-    const updatedGames = games.map(g => {
-      const winner = prompt(`${g.awayTeam} @ ${g.homeTeam}\nWho won? Type "${g.awayTeam}" or "${g.homeTeam}" (or leave blank if not played)`);
-      if (!winner) return { ...g, result: null, completed: false };
-      const result = winner.toUpperCase() === g.awayTeam ? 'away' : winner.toUpperCase() === g.homeTeam ? 'home' : null;
-      return { ...g, result, completed: !!result };
-    });
-    await setDoc(doc(db, 'leagues', currentLeague.id, 'weeks', String(weekNum)), {
-      ...weekData, games: updatedGames, fetchedAt: serverTimestamp()
-    });
-    toast('Results saved!', 'success');
-  };
-
-  // ── TOAST ──
-  function toast(msg, type = '') {
-    const el = document.getElementById('toast');
-    el.textContent = msg; el.className = 'show' + (type ? ' ' + type : '');
-    setTimeout(() => el.className = '', 3000);
-  }
-  window.toast = toast;
+// ── TOAST ──
+function toast(msg, type='') {
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.className='show'+(type?' '+type:'');
+  setTimeout(()=>el.className='',3000);
+}
+window.toast=toast;
 </script>
 </body>
 </html>
