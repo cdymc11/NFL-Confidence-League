@@ -233,8 +233,9 @@
         <input type="number" id="admin-week-num" min="1" max="18" value="1" style="width:80px;" />
       </div>
       <div style="display:flex;gap:10px;flex-wrap:wrap;">
-        <button class="btn btn-primary" onclick="adminFetchGames()">Fetch Games from ESPN</button>
+        <button class="btn btn-primary" onclick="adminFetchGames()">Load Week Schedule</button>
         <button class="btn btn-secondary" onclick="adminScoreWeek()">Score Week</button>
+        <button class="btn btn-secondary" onclick="adminEnterResults()">Enter Results</button>
       </div>
       <div class="error-msg" id="admin-fetch-error" style="margin-top:8px;"></div>
       <div id="admin-fetch-result" class="mt-16" style="font-size:13px;color:var(--muted);"></div>
@@ -473,7 +474,7 @@
     errEl.textContent = ''; resEl.textContent = 'Fetching from ESPN…';
     if (!currentLeague) { errEl.textContent = 'No league loaded.'; resEl.textContent = ''; return; }
     try {
-      const url = `https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard?seasontype=2&week=${weekNum}&season=2026`;
+      const url = `https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard?seasontype=2&week=${weekNum}&season=2025`;
       const res = await fetch(url);
       const data = await res.json();
       const events = data.events || [];
@@ -503,7 +504,7 @@
     errEl.textContent = ''; resEl.textContent = 'Scoring…';
     if (!currentLeague) { errEl.textContent = 'No league loaded.'; return; }
     try {
-      const url = `https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard?seasontype=2&week=${weekNum}&season=2026`;
+      const url = `https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard?seasontype=2&week=${weekNum}&season=2025`;
       const res = await fetch(url); const data = await res.json();
       const events = data.events || [];
       if (!events.length) { errEl.textContent = 'No games found.'; resEl.textContent = ''; return; }
@@ -549,6 +550,25 @@
       resEl.textContent = `✓ Week ${weekNum} scored — ${scored} entries updated.`;
       toast(`Week ${weekNum} scored!`, 'success');
     } catch(e) { errEl.textContent = 'Scoring error.'; resEl.textContent = ''; console.error(e); }
+  };
+
+  // ── ENTER RESULTS MANUALLY ──
+  window.adminEnterResults = async function() {
+    const weekNum = parseInt(document.getElementById('admin-week-num').value);
+    const weekSnap = await getDoc(doc(db, 'leagues', currentLeague.id, 'weeks', String(weekNum)));
+    if (!weekSnap.exists()) { alert('Load the week schedule first.'); return; }
+    const weekData = weekSnap.data();
+    const games = weekData.games;
+    const updatedGames = games.map(g => {
+      const winner = prompt(`${g.awayTeam} @ ${g.homeTeam}\nWho won? Type "${g.awayTeam}" or "${g.homeTeam}" (or leave blank if not played)`);
+      if (!winner) return { ...g, result: null, completed: false };
+      const result = winner.toUpperCase() === g.awayTeam ? 'away' : winner.toUpperCase() === g.homeTeam ? 'home' : null;
+      return { ...g, result, completed: !!result };
+    });
+    await setDoc(doc(db, 'leagues', currentLeague.id, 'weeks', String(weekNum)), {
+      ...weekData, games: updatedGames, fetchedAt: serverTimestamp()
+    });
+    toast('Results saved!', 'success');
   };
 
   // ── TOAST ──
